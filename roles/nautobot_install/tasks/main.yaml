@@ -1,0 +1,22 @@
+- name: Install System Packages
+  apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+
+- name: Install required system packages
+  apt: name={{ item }} state=latest update_cache=yes
+  loop: [ 'python3', 'python3-pip', 'python3-venv', 'python3-dev', 'postgresql', 'redis-server']
+
+- name: " Setup postgres database"
+  src: postgres.j2
+
+- name: Create nautobot database
+  sudo_user: postgres
+  postgresql_db: name={{ pg_db_name }}
+              state=present
+
+- name: Ensure user has access to the database
+  sudo_user: postgres
+  postgresql_user: db={{ pg_db_name }}
+               name={{ pg_user }}
+               password={{ pg_password }}
+               priv=ALL
+               state=present

@@ -1,0 +1,4 @@
+CREATE DATABASE {{ pg_db_name }};
+CREATE USER {{ pg_user }} WITH PASSWORD '{{ pg_password }}';
+GRANT ALL PRIVILEGES ON DATABASE {{ pg_db_name }} TO {{ pg_user }};
+\q
