@@ -4,3 +4,5 @@ all:
       hosts:
         ubuntu-vm:
           ansible_host: 192.168.130.156
+          ansible_user: ubuntu
+          ansible_password: ubuntu

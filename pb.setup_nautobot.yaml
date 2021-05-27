@@ -1,12 +1,7 @@
 ---
 - name: "Install and setup Nautobot on ubuntu"
   hosts: ubuntu-vm
-  gather_facts: False
+  gather_facts: false
 
   roles:
-  - name: Install System Packages
-    apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
-
-  - name: Install required system packages
-    apt: name={{ item }} state=latest update_cache=yes
-    loop: [ 'python3', 'python3-pip', 'python3-venv', 'python3-dev', 'postgresql', 'redis-server']
+  - { role: nautobot_install }
