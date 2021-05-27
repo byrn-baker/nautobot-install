@@ -3,5 +3,87 @@
   hosts: ubuntu-vm
   gather_facts: false
 
-  roles:
-  - { role: nautobot_install }
+  tasks:
+  # - name: Install System Packages
+  #   become: true
+  #   apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+
+  # - name: Install required system packages
+  #   become: true
+  #   apt: name={{ item }} state=latest update_cache=yes
+  #   loop: [ 'python3', 'python3-pip', 'python3-venv', 'python3-dev', 'postgresql', 'redis-server', 'libpq-dev']
+
+  # - name: Install required pip modules
+  #   become: true
+  #   pip: "name={{ item }} state=present"
+  #   with_items:
+  #   - psycopg2-binary
+  #   - psycopg2
+
+  # - name: "Create app database"
+  #   postgresql_db:
+  #     state: present
+  #     name: "{{ pg_db_name }}"
+  #   become: yes
+  #   become_user: postgres
+
+  # - name: "Create db user"
+  #   postgresql_user:
+  #     state: present
+  #     name: "{{ pg_user }}"
+  #     password: "{{ pg_password }}"
+  #   become: yes
+  #   become_user: postgres
+
+  # - name: "Grant db user access to nautobot db"
+  #   postgresql_privs:
+  #     type: database
+  #     database: "{{ pg_db_name }}"
+  #     roles: "{{ pg_user }}"
+  #     grant_option: no
+  #     privs: all
+  #   become: yes
+  #   become_user: postgres
+
+  # - name: Redis ping
+  #   command: redis-cli ping
+  #   register: redis_ping
+
+  # - name: Did Redis respond?
+  #   debug:
+  #     msg: "Redis {{'responded' if redis_ping.stdout=='PONG' else 'did not respond' }}"
+
+  # - name: Create the Nautobot System User
+  #   become: true
+  #   command: useradd --system --shell /bin/bash --create-home --home-dir /opt/nautobot nautobot
+  #   register: nautobot_user
+
+  # - name: Was the user created?
+  #   debug:
+  #     msg: User "{{'was created' if nautobot_user.failed=='false' else 'was not created you screwed something up' }}"
+
+  # - name: add a password to new user
+  #   user:
+  #     name: nautobot
+  #     password: nautobot
+
+  # - name: Create python virtual environment
+  #   become: true
+  #   become_user: nautobot
+  #   command: python3 -m venv /opt/nautobot
+
+  # - name: Update the Nautobot .bashrc
+  #   shell: echo "export NAUTOBOT_ROOT=/opt/nautobot" | sudo tee -a ~nautobot/.bashrc
+
+- name: "Validation"
+  hosts: nautobot
+  gather_facts: false
+
+  tasks:
+
+  - name: Update wheel on nautobot venv
+    pip:
+      name: wheel
+      extra_args: --upgrade
+      virtualenv: /opt/nautobot
+    

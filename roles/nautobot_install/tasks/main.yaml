@@ -72,10 +72,9 @@
 - name: Sudo to nautobot
   become_user: nautobot
   become: yes
-  shell: |
-    echo $NAUTOBOT_ROOT
-    echo $PATH
-    which pip3
+  shell: echo $NAUTOBOT_ROOT
+  args: 
+    chdir: /opt/nautobot
   register: nautobot_root
 
 - debug:
