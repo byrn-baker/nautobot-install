@@ -1,4 +1,4 @@
-# - name: Install System Packages
+# - name: Update APT
 #   become: true
 #   apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
 
@@ -13,6 +13,7 @@
 #   with_items:
 #    - psycopg2-binary
 #    - psycopg2
+#    - pexpect
 
 # - name: "Create app database"
 #   postgresql_db:
@@ -47,35 +48,106 @@
 #   debug:
 #     msg: "Redis {{'responded' if redis_ping.stdout=='PONG' else 'did not respond' }}"
 
-# - name: Create the Nautobot System User
-#   become: true
-#   command: useradd --system --shell /bin/bash --create-home --home-dir /opt/nautobot nautobot
-#   register: nautobot_user
-
-# - name: Was the user created?
-#   debug:
-#     msg: User "{{'was created' if nautobot_user.failed=='false' else 'was not created you screwed something up' }}"
-
-# - name: add a password to new user
+# - name: Create Nautobot user
+#   become: yes
 #   user:
 #     name: nautobot
-#     password: nautobot
+#     shell: /bin/bash
+#     create_home: yes
+#     home: /opt/nautobot
 
-# - name: Create python virtual environment
-#   become: true
+# - name: setup nautobot python virtual environmnet
+#   become: yes
 #   become_user: nautobot
-#   command: python3 -m venv /opt/nautobot
+#   shell: python3 -m venv /opt/nautobot
+
+# - name: Update wheel on nautobot venv
+#   pip:
+#     virtualenv: /opt/nautobot
+#     name: wheel
+#     extra_args: --upgrade
+#   become_user: nautobot
+#   become: yes
+
+# - name: Install Nautobot in Venv
+#   pip:
+#     virtualenv: /opt/nautobot
+#     name: nautobot
+#     chdir: /opt/nautobot
+#   become_user: nautobot
+#   become: yes
+
+# - name: Install Requirements in Venv
+#   pip:
+#     virtualenv: /opt/nautobot
+#     name: "{{ item.name }}"
+#     chdir: /opt/nautobot
+#   loop: "{{ requirements }}"
+#   become_user: nautobot
+#   become: yes
+
+# - name: Check the nautobot Version
+#   become_user: nautobot
+#   become: yes
+#   become_exe: sudo -iu
+#   command: nautobot-server --version
+#   register: version
+
+# - debug:
+#     msg: Nautobot version is "{{ version.stdout }}"
 
 # - name: Update the Nautobot .bashrc
 #   shell: echo "export NAUTOBOT_ROOT=/opt/nautobot" | sudo tee -a ~nautobot/.bashrc
 
-- name: Sudo to nautobot
-  become_user: nautobot
-  become: yes
-  shell: echo $NAUTOBOT_ROOT
-  args: 
-    chdir: /opt/nautobot
-  register: nautobot_root
+# - name: Sudo to nautobot
+#   become_user: nautobot
+#   become_exe: sudo -iu
+#   become: yes
+#   command: "echo $PATH"
+#   register: nautobot_root
 
-- debug:
-    msg: "{{ nautobot_root }}"
+# - debug:
+#     msg: "{{ 'Your PATH looks good' if nautobot_root.stdout=='/opt/nautobot/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin' else 'HMM Something did not work right' }}"
+
+# - name: Sudo to nautobot
+#   become_user: nautobot
+#   become_exe: sudo -iu
+#   become: yes
+#   command: "which python"
+#   register: root_path
+
+# - debug:
+#     msg: "{{ 'Your python path looks right' if root_path.stdout=='/opt/nautobot/bin/python' else 'HMM Something did not work right' }}"
+
+# - name: Creating nautobot_config
+#   become: yes
+#   template:
+#     src: nautobot_config.j2
+#     dest: /opt/nautobot/nautobot_config.py
+#     owner: nautobot
+#     mode: 0755
+
+############################################################################
+# I can't figure out how to make this work
+
+
+- name: Perform migration
+  become: yes
+  become_user: nautobot
+  command: nautobot-server migrate
+  register: migration 
+
+# - debug:
+#     msg: "{{ migrate.stdout }}"
+
+# - name: Creating Super user on nautobot server
+#   become_user: nautobot
+#   ansible.builtin.expect:
+#     command: nautobot-server createsuperuser
+#     responses:
+#       Username: "admin"
+#       Email address: ""
+#       Password: "admin"
+#       Password (again): "admin"
+############################################################################
+
