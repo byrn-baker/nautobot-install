@@ -133,9 +133,20 @@
 
 - name: Perform migration
   become: yes
+  become_exe: sudo -iu
   become_user: nautobot
-  command: nautobot-server migrate
-  register: migration 
+  command: /opt/nautobot/bin/nautobot-server migrate
+  args:
+    # chdir: /opt/nautobot/bin
+    executable: /bin/bash
+  # register: migration
+
+# - name: Run server Migrate
+#   become_user: nautobot
+#   raw: "nautobot-server migrate"
+#   args:
+#     executable: /opt/nautobot/bin/python3
+#   register: migrate
 
 # - debug:
 #     msg: "{{ migrate.stdout }}"
