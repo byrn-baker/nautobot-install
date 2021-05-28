@@ -1,137 +1,148 @@
-- name: Update APT
-  become: true
-  apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+# - name: Update APT
+#   become: true
+#   apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
 
-- name: Install required system packages
-  become: true
-  apt: name={{ item }} state=latest update_cache=yes
-  loop: [ 'python3', 'python3-pip', 'python3-venv', 'python3-dev', 'postgresql', 'redis-server', 'libpq-dev']
+# - name: Install required system packages
+#   become: true
+#   apt: name={{ item }} state=latest update_cache=yes
+#   loop: [ 'python3', 'python3-pip', 'python3-venv', 'python3-dev', 'postgresql', 'redis-server', 'libpq-dev']
 
-- name: Install required pip modules
-  become: true
-  pip: "name={{ item }} state=present"
-  with_items:
-   - psycopg2-binary
-   - psycopg2
-   - pexpect
+# - name: Install required pip modules
+#   become: true
+#   pip: "name={{ item }} state=present"
+#   with_items:
+#    - psycopg2-binary
+#    - psycopg2
+#    - pexpect
 
-- name: "Create app database"
-  postgresql_db:
-    state: present
-    name: "{{ pg_db_name }}"
-  become: yes
-  become_user: postgres
+# - name: "Create app database"
+#   postgresql_db:
+#     state: present
+#     name: "{{ pg_db_name }}"
+#   become: yes
+#   become_user: postgres
 
-- name: "Create db user"
-  postgresql_user:
-    state: present
-    name: "{{ pg_user }}"
-    password: "{{ pg_password }}"
-  become: yes
-  become_user: postgres
+# - name: "Create db user"
+#   postgresql_user:
+#     state: present
+#     name: "{{ pg_user }}"
+#     password: "{{ pg_password }}"
+#   become: yes
+#   become_user: postgres
 
-- name: "Grant db user access to nautobot db"
-  postgresql_privs:
-    type: database
-    database: "{{ pg_db_name }}"
-    roles: "{{ pg_user }}"
-    grant_option: no
-    privs: all
-  become: yes
-  become_user: postgres
+# - name: "Grant db user access to nautobot db"
+#   postgresql_privs:
+#     type: database
+#     database: "{{ pg_db_name }}"
+#     roles: "{{ pg_user }}"
+#     grant_option: no
+#     privs: all
+#   become: yes
+#   become_user: postgres
 
-- name: Redis ping
-  command: redis-cli ping
-  register: redis_ping
+# - name: Redis ping
+#   command: redis-cli ping
+#   register: redis_ping
 
-- name: Did Redis respond?
-  debug:
-    msg: "Redis {{'responded' if redis_ping.stdout=='PONG' else 'did not respond' }}"
+# - name: Did Redis respond?
+#   debug:
+#     msg: "Redis {{'responded' if redis_ping.stdout=='PONG' else 'did not respond' }}"
 
-- name: Create Nautobot user
-  become: yes
-  user:
-    name: nautobot
-    shell: /bin/bash
-    create_home: yes
-    home: /opt/nautobot
-    state: "present"
+# - name: "ADD NAUTOBOT GROUP"
+#   ansible.builtin.group:
+#     name: "nautobot"
+#     system: yes
+#     state: "present"
 
-- name: "SET NAUTOBOT BASHRC SETTING"
-  become: yes
-  lineinfile:
-    path: "/opt/nautobot/.bashrc"
-    line: "export NAUTOBOT_ROOT=/opt/nautobot"
+# - name: Create Nautobot user
+#   become: yes
+#   user:
+#     name: "nautobot"
+#     home: "/opt/nautobot"
+#     shell: "/bin/bash"
+#     system: yes
+#     groups:
+#       - "nautobot"
+#     state: "present"
 
-- name: "SET NAUTOBOT HOME DIRECTORY PERMISSIONS"
-  become: yes
-  file:
-    name: "/opt/nautobot"
-    mode: 0775
-    state: "directory"
+# - name: "SET NAUTOBOT BASHRC SETTING"
+#   become: yes
+#   lineinfile:
+#     path: "/opt/nautobot/.bashrc"
+#     line: "export NAUTOBOT_ROOT=/opt/nautobot"
 
-- name: "UPGRADE PIP"
-  pip:
-    name: "pip"
-    state: "latest"
-    virtualenv: "/opt/nautobot/"
-    virtualenv_command: "python3 -m venv"
-  become: yes
+# - name: "SET NAUTOBOT HOME DIRECTORY PERMISSIONS"
+#   become: yes
+#   file:
+#     path: "/opt/nautobot"
+#     owner: nautobot
+#     mode: 0775
+#     recurse: yes
+#     state: "directory"
 
-- name: Update wheel on nautobot venv
-  pip:
-    virtualenv: /opt/nautobot
-    name: wheel
-    extra_args: --upgrade
-  become_user: nautobot
-  become: yes
+# - name: "UPGRADE PIP"
+#   pip:
+#     name: "pip"
+#     state: "latest"
+#     virtualenv: "/opt/nautobot/"
+#     virtualenv_command: "python3 -m venv"
+#   become: yes
 
-- name: Install Nautobot in Venv
-  pip:
-    virtualenv: /opt/nautobot
-    name: nautobot
-    chdir: /opt/nautobot
-  become_user: nautobot
-  become: yes
+# - name: Update wheel on nautobot venv
+#   pip:
+#     name: wheel
+#     virtualenv: /opt/nautobot
+#     chdir: /opt/nautobot
+#     extra_args: --upgrade
+#   become_user: nautobot
+#   become: yes
 
-- name: Install Requirements in Venv
-  pip:
-    virtualenv: /opt/nautobot
-    name: "{{ item.name }}"
-    chdir: /opt/nautobot
-  loop: "{{ requirements }}"
-  become_user: nautobot
-  become: yes
+# - name: Install Nautobot in Venv
+#   pip:
+#     name: nautobot
+#     virtualenv: /opt/nautobot
+#     chdir: /opt/nautobot
+#   become_user: nautobot
+#   become: yes
 
-- name: Check the nautobot Version
-  become_user: nautobot
-  become: yes
-  become_exe: sudo -iu
-  command: nautobot-server --version
-  register: version
+# - name: Install Requirements in Venv
+#   pip:
+#     virtualenv: /opt/nautobot
+#     name: "{{ item.name }}"
+#     chdir: /opt/nautobot
+#   loop: "{{ requirements }}"
+#   become_user: nautobot
+#   become: yes
 
-- debug:
-    msg: Nautobot version is "{{ version.stdout }}"
+# - name: Check the nautobot Version
+#   become_user: nautobot
+#   become: yes
+#   become_exe: sudo -iu
+#   command: nautobot-server --version
+#   register: version
 
-- name: Checking Paths
-  become_user: nautobot
-  become_exe: sudo -iu
-  become: yes
-  command: "echo $PATH"
-  register: nautobot_root
+# - debug:
+#     msg: Nautobot version is "{{ version.stdout }}"
 
-- debug:
-    msg: "{{ 'Your PATH looks good' if nautobot_root.stdout=='/opt/nautobot/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin' else 'HMM Something did not work right' }}"
+# - name: Checking Paths
+#   become_user: nautobot
+#   become_exe: sudo -iu
+#   become: yes
+#   command: "echo $PATH"
+#   register: nautobot_root
 
-- name: Checking Python path
-  become_user: nautobot
-  become_exe: sudo -iu
-  become: yes
-  command: "which python"
-  register: root_path
+# - debug:
+#     msg: "{{ 'Your PATH looks good' if nautobot_root.stdout=='/opt/nautobot/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin' else 'HMM Something did not work right' }}"
 
-- debug:
-    msg: "{{ 'Your python path looks right' if root_path.stdout=='/opt/nautobot/bin/python' else 'HMM Something did not work right' }}"
+# - name: Checking Python path
+#   become_user: nautobot
+#   become_exe: sudo -iu
+#   become: yes
+#   command: "which python"
+#   register: root_path
+
+# - debug:
+#     msg: "{{ 'Your python path looks right' if root_path.stdout=='/opt/nautobot/bin/python' else 'HMM Something did not work right' }}"
 
 - name: Creating nautobot_config
   become: yes
