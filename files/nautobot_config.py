@@ -53,7 +53,7 @@ RQ_QUEUES = {
 # For detailed configuration see: https://github.com/Suor/django-cacheops#setup
 # Set Cache Ops variables
 redis_protocol = "rediss" if is_truthy(os.getenv("NAUTOBOT_REDIS_SSL", False)) else "redis"
-cache_ops_pwd = os.getenv("NAUTOBOT_REDIS_PASSWORD")
+cache_ops_pwd = os.getenv("NAUTOBOT_REDIS_PASSWORD", "")
 cache_ops_host = os.getenv("NAUTOBOT_REDIS_HOST", "localhost")
 cache_ops_user = os.getenv("NAUTOBOT_REDIS_USER")
 cache_ops_port = int(os.getenv("NAUTOBOT_REDIS_PORT", 6379))

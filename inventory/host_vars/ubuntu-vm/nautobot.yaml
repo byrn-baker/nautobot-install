@@ -1,11 +1,21 @@
+# Database vars
 pg_db_name: nautobot
 pg_user: nautobot
 pg_password: nautobot
+# Nautobot web vars
+cert_path: "/etc/ssl"
+cert_country: US
+cert_state: CO
+cert_city: Denver
+cert_domain: "nautobot-demo.byrnbaker.local"
+nautobot_http_port: 80
+nautobot_https_port: 443
 venv_dir: /opt/nautobot
 requirements:
     - name: napalm
     - name: nornir-nautobot
     - name: nautobot-golden-config
+    - name: nautobot-device-onboarding
 nautobot_config:
   allowed_hosts: 
     - prfx: '*'

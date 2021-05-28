@@ -1,0 +1,65 @@
+ #Using ansible-galaxy collection install community.docker
+
+# - name: Install Prerequisites
+#   apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
+
+# - name: Install required system packages
+#   apt: name={{ item }} state=latest update_cache=yes
+#   loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+# - name: Add Docker GPG apt Key
+#   apt_key:
+#     url: https://download.docker.com/linux/ubuntu/gpg
+#     state: present
+
+# - name: Add Docker Repository
+#   apt_repository:
+#     repo: deb https://download.docker.com/linux/ubuntu focal stable
+#     state: present
+
+# - name: Update apt and install docker-ce
+#   apt: update_cache=yes name=docker-ce state=latest
+
+# - name: Install Docker Module for Python
+#   pip:
+#     name: docker
+
+- name: Pull default Docker image
+  docker_image:
+    name: "{{ container_image }}"
+    source: pull
+
+- name: Create nautobot container
+  docker_container:
+    name: "{{ container_name }}"
+    image: "{{ container_image }}"
+    state: started
+    ports: "{{ ports }}"
+  with_sequence: count={{ containers }}
+
+- name: Print Docker images to the screen
+  community.docker.docker_host_info:
+    images: yes
+  register: docker_images
+
+- name: print to screen
+  debug: 
+    msg: "{{ docker_images.images }}"
+
+- name: Get infos on container
+  community.docker.docker_container_info:
+    name: "{{ container_name }}"
+  register: container_info
+
+- name: Does container exist?
+  ansible.builtin.debug:
+    msg: "The container {{ container_name }} {{ 'exists' if container_info.exists else 'does not exist' }}"
+
+- name: Creating Super user on nautobot server
+  ansible.builtin.expect:
+    command: docker exec -it "{{ container_name }}" nautobot-server createsuperuser
+    responses:
+      Username: "admin"
+      Email address: ""
+      Password: "admin"
+      Password (again): "admin"

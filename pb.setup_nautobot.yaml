@@ -1,21 +1,8 @@
 ---
-# - name: "Install and setup Nautobot on ubuntu"
-#   hosts: ubuntu-vm
-#   gather_facts: true
-
-#   roles:
-#   - { role: nautobot_install }    
-
-- name: Connect to nautobot user
-  hosts: nautobot
+- name: "Install and setup Nautobot on ubuntu"
+  hosts: ubuntu-vm
   gather_facts: true
 
-  tasks:
-  - name: Run server Migrate
-    command: /opt/nautobot/bin/nautobot-server migrate
-    # args:
-    #   executable: /bin/bash
-    register: migrate
-
-#   - debug:
-#       msg: "{{ migrate.stdout }}"
+  roles:
+  - { role: nautobot_install }
+  - { role: nautobot_install_web }

@@ -1,0 +1,6 @@
+- hosts: ubuntu-docker_host
+  become: true
+  gather_facts: false
+
+  roles:
+  - { role: setup_nautobot_docker }

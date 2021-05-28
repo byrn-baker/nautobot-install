@@ -1,0 +1,24 @@
+# Docker Host 
+docker_vm_user: ansible
+docker_vm_pass: ansible
+docker_vm_become: ansible
+
+# Docker variables
+containers: 1
+container_name: nautobot-lab-v102
+container_image: networktocode/nautobot-lab:latest
+ports: "8002:8002"
+
+pip_requirements:
+  - name: napalm
+  - name: nornir-nautobot
+  - name: nautobot-golden-config
+
+nautobot_config:
+  allowed_hosts: 
+    - prfx: '*'
+  napalm_user: nautobot
+  napalm_passwd: N@utobot123
+  nautobot_plugins:
+    - name: nautobot_plugin_nornir
+    - name: nautobot_golden_config

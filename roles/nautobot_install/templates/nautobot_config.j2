@@ -51,13 +51,6 @@ RQ_QUEUES = {
 
 # Nautobot uses Cacheops for database query caching. These are the following defaults.
 # For detailed configuration see: https://github.com/Suor/django-cacheops#setup
-# Set Cache Ops variables
-redis_protocol = "rediss" if is_truthy(os.getenv("NAUTOBOT_REDIS_SSL", False)) else "redis"
-cache_ops_pwd = os.getenv("NAUTOBOT_REDIS_PASSWORD")
-cache_ops_host = os.getenv("NAUTOBOT_REDIS_HOST", "localhost")
-cache_ops_user = os.getenv("NAUTOBOT_REDIS_USER")
-cache_ops_port = int(os.getenv("NAUTOBOT_REDIS_PORT", 6379))
-
 CACHEOPS_REDIS = os.getenv("NAUTOBOT_CACHEOPS_REDIS", f"{redis_protocol}://:{cache_ops_pwd}@{cache_ops_host}:{cache_ops_port}/1")
 
 # The django-redis cache is used to establish concurrent locks using Redis. The
@@ -65,11 +58,10 @@ CACHEOPS_REDIS = os.getenv("NAUTOBOT_CACHEOPS_REDIS", f"{redis_protocol}://:{cac
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{redis_protocol}://:{cache_ops_pwd}@{cache_ops_host}:{cache_ops_port}/0",
+        "LOCATION": parse_redis_connection(redis_database=0),
         "TIMEOUT": 300,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": "",
         },
     }
 }
@@ -113,8 +105,8 @@ ALLOWED_URL_SCHEMES = (
 
 # Optionally display a persistent banner at the top and/or bottom of every page. HTML is allowed. To display the same
 # content in both banners, define BANNER_TOP and set BANNER_BOTTOM = BANNER_TOP.
-BANNER_TOP = os.getenv("NAUTOBOT_BANNER_TOP", "")
-BANNER_BOTTOM = os.getenv("NAUTOBOT_BANNER_BOTTOM", "")
+BANNER_TOP = os.getenv("NAUTOBOT_BANNER_TOP", "LOGIN ADMIN and PASSWORD IS ADMIN")
+BANNER_BOTTOM = os.getenv("NAUTOBOT_BANNER_BOTTOM", "LOGIN ADMIN and PASSWORD IS ADMIN")
 
 # Text to include on the login page above the login form. HTML is allowed.
 BANNER_LOGIN = os.getenv("NAUTOBOT_BANNER_LOGIN", "")
