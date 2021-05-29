@@ -144,31 +144,31 @@
 # - debug:
 #     msg: "{{ 'Your python path looks right' if root_path.stdout=='/opt/nautobot/bin/python' else 'HMM Something did not work right' }}"
 
-- name: Creating nautobot_config
-  become: yes
-  template:
-    src: nautobot_config.j2
-    dest: /opt/nautobot/nautobot_config.py
-    owner: nautobot
-    mode: 0644
+# - name: Creating nautobot_config
+#   become: yes
+#   template:
+#     src: nautobot_config.j2
+#     dest: /opt/nautobot/nautobot_config.py
+#     owner: nautobot
+#     mode: 0644
 
-- name: "RUN DATABASE MIGRATIONS"
-  command: "/opt/nautobot/bin/nautobot-server migrate --config=/opt/nautobot/nautobot_config.py"
-  become_user: nautobot
-  register: run_db_migrations
-  changed_when: "'No migrations to apply.' not in run_db_migrations['stdout']"
-  environment:
-    NAUTOBOT_ROOT: /opt/nautobot
+# - name: "RUN DATABASE MIGRATIONS"
+#   command: "/opt/nautobot/bin/nautobot-server migrate --config=/opt/nautobot/nautobot_config.py"
+#   become_user: nautobot
+#   register: run_db_migrations
+#   changed_when: "'No migrations to apply.' not in run_db_migrations['stdout']"
+#   environment:
+#     NAUTOBOT_ROOT: /opt/nautobot
 
-- name: Creating Super user on nautobot server
-  become_user: nautobot
-  ansible.builtin.expect:
-    command: "/opt/nautobot/bin/nautobot-server createsuperuser --config=/opt/nautobot/nautobot_config.py"
-    responses:
-      Username: "admin"
-      Email address: ""
-      Password: "admin"
-      Password (again): "admin"
+# - name: Creating Super user on nautobot server
+#   become_user: nautobot
+#   ansible.builtin.expect:
+#     command: "/opt/nautobot/bin/nautobot-server createsuperuser --config=/opt/nautobot/nautobot_config.py"
+#     responses:
+#       Username: "admin"
+#       Email address: ""
+#       Password: "admin"
+#       Password (again): "admin"
 
 - name: "RUN COLLECTSTATIC"
   command: "/opt/nautobot/bin/nautobot-server collectstatic --config=/opt/nautobot/nautobot_config.py --noinput"

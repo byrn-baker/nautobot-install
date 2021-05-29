@@ -24,7 +24,7 @@ nautobot_config:
   nautobot_plugins:
     - name: nautobot_plugin_nornir
     - name: nautobot_golden_config
-    - name: nautobot-device-onboarding
+    - name: nautobot_device_onboarding
   nautobot_plugin_config:
     nautobot_plugin_nornir:
       nornir_settings:
